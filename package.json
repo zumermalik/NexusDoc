@@ -10,7 +10,8 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:electron": "cd app-desktop && npm start",
     "dev:web": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:local": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"wait-on http://localhost:5173 && npm run dev:electron\""
+    "dev:local": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"wait-on http://localhost:5173 && npm run dev:electron\"",
+    "dev:desktop": "concurrently \"npm run dev:frontend\" \"cd app-desktop && npm start\""
   },
   "repository": {
     "type": "git",
