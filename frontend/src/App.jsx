@@ -2,154 +2,216 @@ import { useState } from 'react'
 
 function App() {
   const [activeTab, setActiveTab] = useState('prd');
-  
-  // Form State
-  const [formData, setFormData] = useState({
-    projectName: '',
-    targetAudience: '',
-    coreFeatures: ''
-  });
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Handle Input Changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // Form States
+  const [prdData, setPrdData] = useState({ projectName: '', targetAudience: '', coreFeatures: '' });
+  const [apiData, setApiData] = useState({ apiName: '', baseUrl: '', endpoints: '' });
+  const [auditData, setAuditData] = useState({ projectName: '', auditScope: 'Web Application', codeSnippet: '' });
+  const handleAuditChange = (e) => setAuditData({ ...auditData, [e.target.name]: e.target.value });
 
-  // The Magic Function: Talks to Backend and Triggers Download
-  const handleGeneratePRD = async (e) => {
+  const handleGenerateAudit = async (e) => {
     e.preventDefault();
     setIsGenerating(true);
-
     try {
-      // Send the data to your Node Express server
-      const response = await fetch('/api/generate/prd', {
+      const response = await fetch('/api/generate/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(auditData)
       });
-
       if (!response.ok) throw new Error('Generation failed');
-
-      // Convert the response into a downloadable file (Blob)
+      
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      
-      // Create a hidden link, click it to download, and remove it
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${formData.projectName ? formData.projectName.replace(/\s+/g, '_') : 'PRD_Document'}.docx`;
+      link.download = `${auditData.projectName ? auditData.projectName.replace(/\s+/g, '_') : 'Security_Audit'}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
     } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to generate document. Make sure your backend is running!');
+      alert('Failed to generate Audit. Make sure backend is running!');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Handle Form Inputs
+  const handlePrdChange = (e) => setPrdData({ ...prdData, [e.target.name]: e.target.value });
+  const handleApiChange = (e) => setApiData({ ...apiData, [e.target.name]: e.target.value });
+
+  // Route 1: Generate PRD (DOCX)
+  const handleGeneratePRD = async (e) => {
+    e.preventDefault();
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/generate/prd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prdData)
+      });
+      if (!response.ok) throw new Error('Generation failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${prdData.projectName ? prdData.projectName.replace(/\s+/g, '_') : 'PRD'}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert('Failed to generate PRD. Make sure backend is running!');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Route 2: Generate API (PDF)
+  const handleGenerateAPI = async (e) => {
+    e.preventDefault();
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/generate/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiData)
+      });
+      if (!response.ok) throw new Error('Generation failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${apiData.apiName ? apiData.apiName.replace(/\s+/g, '_') : 'API_Docs'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert('Failed to generate PDF. Make sure backend is running!');
     } finally {
       setIsGenerating(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen w-full flex bg-[#0B0F19]">
-      {/* Background glowing orbs */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
-
+    <div className="relative min-h-screen w-full flex bg-[#F6F8FA]">
       {/* Sidebar Navigation */}
-      <aside className="w-64 h-screen p-5 flex flex-col gap-4 glass-panel z-10 border-r border-white/5 relative">
+      <aside className="w-64 h-screen p-5 flex flex-col gap-4 bg-white/40 backdrop-blur-3xl z-10 border-r border-slate-200/60">
         <div className="flex items-center gap-3 px-2 py-4 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center justify-center font-bold text-white text-lg">
+          <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center font-bold text-white text-lg shadow-md">
             N
           </div>
-          <h1 className="text-xl font-bold tracking-wide text-white/90">NexusDoc</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">NexusDoc</h1>
         </div>
 
         <nav className="flex flex-col gap-2">
-          <button onClick={() => setActiveTab('prd')} className={`px-4 py-3 rounded-xl text-left transition-all duration-300 ${activeTab === 'prd' ? 'bg-white/10 text-white shadow-sm border border-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>📄 PRD Generator</button>
-          <button onClick={() => setActiveTab('api')} className={`px-4 py-3 rounded-xl text-left transition-all duration-300 ${activeTab === 'api' ? 'bg-white/10 text-white shadow-sm border border-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>⚡ API Docs</button>
-          <button onClick={() => setActiveTab('audit')} className={`px-4 py-3 rounded-xl text-left transition-all duration-300 ${activeTab === 'audit' ? 'bg-white/10 text-white shadow-sm border border-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>🛡️ Security Audit</button>
+          <button onClick={() => setActiveTab('prd')} className={`px-4 py-3 rounded-2xl text-left font-medium transition-all duration-300 ${activeTab === 'prd' ? 'bg-white text-black shadow-sm border border-slate-100' : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'}`}>📄 PRD Generator</button>
+          <button onClick={() => setActiveTab('api')} className={`px-4 py-3 rounded-2xl text-left font-medium transition-all duration-300 ${activeTab === 'api' ? 'bg-white text-black shadow-sm border border-slate-100' : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'}`}>⚡ API Docs</button>
+          <button onClick={() => setActiveTab('audit')} className={`px-4 py-3 rounded-2xl text-left font-medium transition-all duration-300 ${activeTab === 'audit' ? 'bg-white text-black shadow-sm border border-slate-100' : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'}`}>🛡️ Security Audit</button>
         </nav>
 
-        <div className="mt-auto p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-600/10 border border-white/5 glass-panel">
-          <p className="text-xs text-slate-300 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Node Backend: Online
+        <div className="mt-auto p-4 rounded-2xl bg-white/60 border border-slate-100 shadow-sm">
+          <p className="text-xs font-medium text-slate-500 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Local Engine Active
           </p>
         </div>
       </aside>
 
-      {/* Main Content Dashboard */}
-      <main className="flex-1 h-screen p-10 z-10 relative overflow-y-auto">
-        <header className="flex justify-between items-center mb-10 mt-4">
-          <h2 className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-            {activeTab === 'prd' && 'Product Requirements Studio'}
-            {activeTab === 'api' && 'API Documentation Engine'}
-            {activeTab === 'audit' && 'Security Audit Compiler'}
+      {/* Main Content */}
+      <main className="flex-1 h-screen p-12 z-10 relative overflow-y-auto">
+        <header className="mb-10">
+          <h2 className="text-4xl font-bold tracking-tight text-slate-900">
+            {activeTab === 'prd' && 'Product Requirements'}
+            {activeTab === 'api' && 'API Documentation'}
+            {activeTab === 'audit' && 'Security Audit'}
           </h2>
+          <p className="text-slate-500 mt-2 font-medium">Configure and compile your local codebase securely.</p>
         </header>
 
         {/* Dynamic Content Panel */}
-        <div className="glass-panel rounded-3xl p-10 min-h-[55vh] relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
+        <div className="glass-panel rounded-[2rem] p-10 min-h-[55vh] max-w-3xl">
           
+          {/* PRD DOCS FORM */}
           {activeTab === 'prd' && (
-            <form onSubmit={handleGeneratePRD} className="relative z-10 flex flex-col gap-6 max-w-2xl mx-auto">
+            <form onSubmit={handleGeneratePRD} className="flex flex-col gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Project Name</label>
-                <input 
-                  type="text" 
-                  name="projectName"
-                  value={formData.projectName}
-                  onChange={handleChange}
-                  placeholder="e.g., BioRevive AI" 
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
-                />
+                <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Project Name</label>
+                <input type="text" name="projectName" value={prdData.projectName} onChange={handlePrdChange} placeholder="e.g., Nexus System" className="input-field" required />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Target Audience</label>
-                <textarea 
-                  name="targetAudience"
-                  value={formData.targetAudience}
-                  onChange={handleChange}
-                  placeholder="Describe who this product is for..." 
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all h-24 resize-none"
-                  required
-                />
+                <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Target Audience</label>
+                <textarea name="targetAudience" value={prdData.targetAudience} onChange={handlePrdChange} placeholder="Describe who this product is for..." className="input-field h-24 resize-none" required />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Core Features & Architecture</label>
-                <textarea 
-                  name="coreFeatures"
-                  value={formData.coreFeatures}
-                  onChange={handleChange}
-                  placeholder="List the primary technical capabilities..." 
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all h-32 resize-none"
-                  required
-                />
+                <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Core Features & Architecture</label>
+                <textarea name="coreFeatures" value={prdData.coreFeatures} onChange={handlePrdChange} placeholder="List the primary technical capabilities..." className="input-field h-32 resize-none" required />
               </div>
 
-              <button 
-                type="submit" 
-                disabled={isGenerating}
-                className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3.5 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 shadow-[0_0_20px_rgba(59,130,246,0.3)] disabled:opacity-50 flex items-center justify-center cursor-pointer"
-              >
-                {isGenerating ? 'Compiling Document...' : 'Generate PRD (.docx)'}
+              <button type="submit" disabled={isGenerating} className="btn-primary">
+                {isGenerating ? 'Compiling Document...' : '✓ Generate PRD (.docx)'}
               </button>
             </form>
           )}
 
-          {activeTab !== 'prd' && (
-             <div className="flex flex-col items-center justify-center h-full text-center mt-20">
-               <div className="text-4xl mb-4">🚧</div>
-               <h3 className="text-xl font-medium text-white mb-2">Under Construction</h3>
-               <p className="text-slate-400 text-sm">We will wire up this module next.</p>
-             </div>
+          {/* API DOCS FORM */}
+          {activeTab === 'api' && (
+            <form onSubmit={handleGenerateAPI} className="flex flex-col gap-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Service Name</label>
+                  <input type="text" name="apiName" value={apiData.apiName} onChange={handleApiChange} placeholder="e.g., Nexus Data API" className="input-field" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Base URL</label>
+                  <input type="text" name="baseUrl" value={apiData.baseUrl} onChange={handleApiChange} placeholder="https://api.example.com/v1" className="input-field" required />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Endpoints (Markdown/JSON format)</label>
+                <textarea name="endpoints" value={apiData.endpoints} onChange={handleApiChange} placeholder="GET /users - Fetches all users&#10;POST /auth - Authenticates a session..." className="input-field h-40 resize-none" required />
+              </div>
+
+              <button type="submit" disabled={isGenerating} className="btn-primary">
+                {isGenerating ? 'Rendering PDF...' : '✓ Generate API PDF'}
+              </button>
+            </form>
+          )}
+
+         {/* SECURITY AUDIT FORM */}
+          {activeTab === 'audit' && (
+            <form onSubmit={handleGenerateAudit} className="flex flex-col gap-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Target Name</label>
+                  <input type="text" name="projectName" value={auditData.projectName} onChange={handleAuditChange} placeholder="e.g., Mempool.exe" className="input-field" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Audit Scope</label>
+                  <select name="auditScope" value={auditData.auditScope} onChange={handleAuditChange} className="input-field cursor-pointer">
+                    <option>Web Application</option>
+                    <option>Smart Contract / Web3</option>
+                    <option>Cloud Infrastructure</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Target Code / Architecture (Markdown)</label>
+                <textarea name="codeSnippet" value={auditData.codeSnippet} onChange={handleAuditChange} placeholder="Paste the critical logic or smart contract code here..." className="input-field h-40 resize-none font-mono text-sm" required />
+              </div>
+
+              <button type="submit" disabled={isGenerating} className="btn-primary !bg-red-600 hover:!bg-red-700 shadow-[0_8px_20px_rgba(239,68,68,0.2)]">
+                {isGenerating ? 'Compiling Audit...' : '🛡️ Generate Audit Report'}
+              </button>
+            </form>
           )}
         </div>
       </main>
