@@ -1,0 +1,31 @@
+{
+  "name": "nexusdoc",
+  "version": "1.0.0",
+  "description": "NexusDoc is an open-source, local-first engine designed to streamline technical documentation for software engineering teams. By processing data entirely on local infrastructure, it ensures zero data leakage, making it a secure solution for handling sensitive codebase context.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../app-desktop && npm install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:electron": "cd app-desktop && npm start",
+    "dev:web": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:local": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"wait-on http://localhost:5173 && npm run dev:electron\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zumermalik/NexusDoc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zumermalik/NexusDoc/issues"
+  },
+  "homepage": "https://github.com/zumermalik/NexusDoc#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "wait-on": "^7.2.0"
+  }
+}
