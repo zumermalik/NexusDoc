@@ -1,5 +1,7 @@
+
 const express = require('express');
 const cors = require('cors');
+const docxRoute = require('./routes/generate-docx');
 
 const app = express();
 const PORT = 4000;
@@ -11,6 +13,9 @@ app.use(express.json());
 app.get('/api/status', (req, res) => {
   res.json({ status: 'NexusDoc Backend is running locally 🚀' });
 });
+
+// Document Generation Endpoints
+app.use('/api/generate', docxRoute);
 
 app.listen(PORT, () => {
   console.log(`Backend server listening on http://localhost:${PORT}`);
